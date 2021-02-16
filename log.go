@@ -77,7 +77,7 @@ func lmlog(level uint, format string, args ...interface{}) {
 
 	switch level {
 	case LevelDebug:
-		prefixColor = ""
+		prefixColor = Cyan
 		break
 	case LevelInfo:
 		prefixColor = Cyan
