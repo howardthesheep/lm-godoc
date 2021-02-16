@@ -1,12 +1,15 @@
+
+GOFILES := $(shell find . -type f -name "*.go")
+
 lm-godoc:
-	go build -o lm-godoc.out main.go
+	go build -o godoc.out main.go log.go
 
 all: lm-godoc
 
 build: lm-godoc
 
 clean:
-	rm -f lm-godoc
+	rm -f *.out
 
 run:
 	go run lm-godoc
