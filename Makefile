@@ -1,5 +1,5 @@
 lm-godoc:
-	go build -o lm-godoc main.go
+	go build -o lm-godoc.out main.go
 
 all: lm-godoc
 
