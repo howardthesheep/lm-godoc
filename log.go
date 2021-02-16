@@ -32,31 +32,30 @@ const (
 // Our Logging struct which implements allmanf
 type Logger struct{}
 
-
 /******* Allmanf Method Implementations *******/
 
 func (Logger) Emergf(format string, args ...interface{}) {
-	lmlog(LevelEmerg,format, args...)
+	lmlog(LevelEmerg, format, args...)
 }
 
 func (Logger) Critf(format string, args ...interface{}) {
-	lmlog(LevelCrit,format, args...)
+	lmlog(LevelCrit, format, args...)
 }
 
 func (Logger) Errorf(format string, args ...interface{}) {
-	lmlog(LevelError,format, args...)
+	lmlog(LevelError, format, args...)
 }
 
 func (Logger) Alertf(format string, args ...interface{}) {
-	lmlog(LevelAlert,format, args...)
+	lmlog(LevelAlert, format, args...)
 }
 
 func (Logger) Warnf(format string, args ...interface{}) {
-	lmlog(LevelWarning,format, args...)
+	lmlog(LevelWarning, format, args...)
 }
 
 func (Logger) Noticef(format string, args ...interface{}) {
-	lmlog(LevelNotice,format, args...)
+	lmlog(LevelNotice, format, args...)
 }
 
 func (Logger) Infof(format string, args ...interface{}) {
@@ -66,7 +65,6 @@ func (Logger) Infof(format string, args ...interface{}) {
 func (Logger) Debugf(format string, args ...interface{}) {
 	lmlog(LevelDebug, format, args...)
 }
-
 
 /******* Helper Methods *******/
 
@@ -82,7 +80,7 @@ func lmlog(level uint, format string, args ...interface{}) {
 		prefixColor = ""
 		break
 	case LevelInfo:
-		prefixColor = White
+		prefixColor = Cyan
 		break
 	case LevelNotice:
 		prefixColor = White
@@ -106,8 +104,5 @@ func lmlog(level uint, format string, args ...interface{}) {
 		fmt.Printf("%s", "Invalid Log Level Provided")
 	}
 
-
-	fmt.Printf(prefixColor + format + Reset + "\n", args...)
+	fmt.Printf(prefixColor+format+Reset+"\n", args...)
 }
-
-
