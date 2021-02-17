@@ -3,10 +3,20 @@
         <title>TEST</title>
     </head>
     <body>
-        <h1>TEST MESSAGE</h1>
+        <h1>{{.RootDir}}</h1>
+        <h2>Packages</h2>
         <ul>
-            {{range .}}
-                <li>{{.Name }} : {{.ImportPath}}</li>
+            {{range .DocumentPackages}}
+                <li>
+                    <details>
+                        <summary><strong>{{.Name}}</strong></summary>
+                        <p><b>Path:</b> {{.ImportPath}}</p>
+                        <p>
+                            <b>Documentation:</b>
+                            {{.Doc}}
+                        </p>
+                    </details>
+                </li>
             {{end}}
         </ul>
     </body>
