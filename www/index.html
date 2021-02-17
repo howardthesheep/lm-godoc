@@ -4,5 +4,10 @@
     </head>
     <body>
         <h1>TEST MESSAGE</h1>
+        <ul>
+            {{range .}}
+                <li>{{.Name }} : {{.ImportPath}}</li>
+            {{end}}
+        </ul>
     </body>
 </html>

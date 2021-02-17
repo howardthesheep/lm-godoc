@@ -5,6 +5,7 @@ import (
 	"go/doc"
 	"go/parser"
 	"go/token"
+	"html/template"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -47,12 +48,26 @@ func main() {
 		}
 	}
 
+	// Load HTML Template for Displaying documentPackages
+	htmlTemplate, err := template.ParseFiles("./www/index.html")
+	if err != nil {
+		lmlogger.Errorf("%s", err)
+		return
+	}
+
+	// Handler for serving htmlTemplate on request to root path (Ex. http://localhost:6969/)
+	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
+		err := htmlTemplate.Execute(writer, documentPackages)
+		if err != nil {
+			lmlogger.Errorf("%s", err)
+		}
+	})
+
 	// Open User's Web Browser and direct to URL
 	command := exec.Command("xdg-open", URL)
 	_ = command.Start()
 
-	// Populate www directory
-	http.Handle("/", http.FileServer(http.Dir("./www")))
+	// Start the HTTP Web Server
 	_ = http.ListenAndServe(":6969", nil)
 }
 
