@@ -24,7 +24,7 @@ type htmlTemplateData struct {
 	DocumentPackages []doc.Package
 }
 
-// main is the default Golang Driver Func
+// main
 func main() {
 	args := os.Args[1:]
 	if len(args) != 1 {
@@ -48,15 +48,14 @@ func main() {
 	}
 
 	// Print []doc.Package to the User
-	for _, documentPackage := range documentPackages {
-		lmlogger.Debugf(
-			"Package: %s \n\tImport Path: %s\n\tDoc: %s",
-			documentPackage.Name,
-			documentPackage.ImportPath,
-			documentPackage.Doc,
-		)
-
-	}
+	//for _, documentPackage := range documentPackages {
+	//	lmlogger.Debugf(
+	//		"Package: %s \n\tImport Path: %s\n\tDoc: %s",
+	//		documentPackage.Name,
+	//		documentPackage.ImportPath,
+	//		documentPackage.Doc,
+	//	)
+	//}
 
 	// Load HTML Template for Displaying documentPackages
 	htmlTemplate, err := template.ParseFiles("./www/index.html")
@@ -139,10 +138,8 @@ func createDocPackages(packages []string, baseDir string) ([]doc.Package, error)
 			return nil, err
 		}
 
-		//lmlogger.Debugf("Directory: %s", dir)
-		//lmlogger.Debugf("Packages:")
 		for _, pack := range packs {
-			//lmlogger.Debugf("\t%s", pack.Name)
+			// Pass Import Dir via pack.Name var
 			pack.Name += "|" + dir[len(baseDir)-1:]
 			pkgs = append(pkgs, *pack)
 		}
@@ -158,6 +155,7 @@ func createDocPackages(packages []string, baseDir string) ([]doc.Package, error)
 		packName = tokens[0]
 		packPath = tokens[1]
 
+		// Get ImportDir out of pkg.Name and reset pkg.Name
 		pkg.Name = packName
 
 		// get doc.Package
