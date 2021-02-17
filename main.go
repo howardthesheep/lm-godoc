@@ -5,6 +5,7 @@ import (
 	"go/doc"
 	"go/parser"
 	"go/token"
+	"io/ioutil"
 	"os"
 	"strings"
 )
@@ -12,8 +13,6 @@ import (
 var lmlogger = Logger{}
 
 func main() {
-	var docPackages []doc.Package
-
 	args := os.Args[1:]
 	if len(args) != 1 {
 		lmlogger.Debugf("%s", "Invalid Usage: Provide directory to document\n"+
@@ -21,70 +20,108 @@ func main() {
 		return
 	}
 
-	docPackages, err := populateDocPackages(args)
+	// Get Dir from command args
+	baseDirStr := args[0]
+
+	// Find all directories containing Go Files
+	goPackages := findGoPackages(baseDirStr)
+
+	// Get []doc.Packages from our Go packages
+	var documentPackages []doc.Package
+	documentPackages, err := createDocPackages(goPackages, baseDirStr)
 	if err != nil {
 		lmlogger.Errorf("%s", err)
 		return
 	}
 
-	for _, docPackage := range docPackages {
-		lmlogger.Noticef("%s\n%s", docPackage.Name, docPackage.Doc)
+	for _, documentPackage := range documentPackages {
+		lmlogger.Debugf("Package: %s \n\tImport Path: %s\n\tFiles:", documentPackage.Name, documentPackage.ImportPath)
+
+		for _, fileName := range documentPackage.Filenames {
+			lmlogger.Debugf("\t%s", fileName)
+		}
 	}
 }
 
-// populateDocPackages iterates over the provided directory in args
-// This directory and its contents are converted into an []doc.Package
-func populateDocPackages(args []string) ([]doc.Package, error) {
-	// Get Dir from command args
-	baseDirStr := args[0]
-
-	var pkgs []ast.Package
-
-	// Parse baseDir
-	fset := token.NewFileSet()
-	packs, err := parser.ParseDir(fset, baseDirStr, nil, parser.AllErrors)
-	if err != nil {
-		return nil, err
-	}
-
-	// Append baseDir ast.Package to pkgs
-	for _, pack := range packs {
-		pkgs = append(pkgs, *pack)
-	}
+// findGoPackages recursively searches baseDir directory and its subdirectories for Golang
+// Packages and returns what it finds
+func findGoPackages(baseDir string) []string {
+	var goPackages []string
 
 	// Get list of files in baseDir
-	files, err := os.ReadDir(baseDirStr)
+	files, err := ioutil.ReadDir(baseDir)
 	if err != nil {
-		return nil, err
+		return nil
 	}
 
-	// Get list of sub-directories (potential go packages)
-	var dirs []os.DirEntry
+	// Get dirs and files
+	var dirs []os.FileInfo
+	var fles []os.FileInfo
 	for _, file := range files {
-		if file.IsDir() && !strings.Contains(file.Name(), ".") {
+		if file.IsDir() {
 			dirs = append(dirs, file)
+		}
+		fles = append(fles, file)
+	}
+
+	// Search Dirs
+	for _, dir := range dirs {
+		// Recursive search sub-dirs
+		packages := findGoPackages(baseDir + dir.Name() + "/")
+
+		// Append our findings
+		goPackages = append(goPackages, packages...)
+	}
+
+	// Search Files
+	for _, fle := range fles {
+		if strings.Contains(fle.Name(), ".go") {
+			// If we have .go files, we know we're in a go package
+			goPackages = append(goPackages, baseDir)
+			break
 		}
 	}
 
-	// Convert sub-dirs to ast.Package
-	for _, dir := range dirs {
+	return goPackages
+}
+
+// createDocPackages takes a list of Go Package file paths and converts them to []doc.Package
+func createDocPackages(packages []string, baseDir string) ([]doc.Package, error) {
+	// Convert packages to ast.Package
+	var pkgs []ast.Package
+	for _, dir := range packages {
 		fset := token.NewFileSet()
-		packs, err := parser.ParseDir(fset, baseDirStr+dir.Name(), nil, parser.AllErrors)
+		packs, err := parser.ParseDir(fset, dir, nil, parser.AllErrors)
 		if err != nil {
 			return nil, err
 		}
 
-		// Append subdir as ast.Package to pkgs
+		//lmlogger.Debugf("Directory: %s", dir)
+		//lmlogger.Debugf("Packages:")
 		for _, pack := range packs {
+			//lmlogger.Debugf("\t%s", pack.Name)
+			pack.Name += "|" + dir[len(baseDir)-1:]
 			pkgs = append(pkgs, *pack)
 		}
 	}
 
-	// For each package in the dir
+	// Convert []ast.Package to []doc.package and return to user
 	var docs []doc.Package
 	for _, pkg := range pkgs {
-		// Convert to doc.package and append to our list
+		var packName string
+		var packPath string
+
+		tokens := strings.Split(pkg.Name, "|")
+		packName = tokens[0]
+		packPath = tokens[1]
+
+		pkg.Name = packName
+
+		// get doc.Package
 		pack := doc.New(&pkg, "", doc.PreserveAST)
+
+		// Update Import Path
+		pack.ImportPath = packPath
 		docs = append(docs, *pack)
 	}
 	return docs, nil
