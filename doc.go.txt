@@ -15,9 +15,14 @@ import (
 // BEGIN PARKER EDIT
 type File struct {
 	Filename string
-	Comments []ast.CommentGroup
-}
 
+	// declarations
+	Comments []ast.CommentGroup
+	Consts []*Value
+	Types  []*Type
+	Vars   []*Value
+	Funcs  []*Func
+}
 // END Parker EDIT
 
 // Package is the documentation for an entire package.
@@ -26,13 +31,14 @@ type Package struct {
 	Name       string
 	ImportPath string
 	Imports    []string
-	Files      []File // Parker
+	Files      []File	// Parker
 	Notes      map[string][]*Note
 
 	// Deprecated: For backward compatibility Bugs is still populated,
 	// but all new code should use Notes instead.
 	Bugs []string
 
+	//TODO: Remove these
 	// declarations
 	Consts []*Value
 	Types  []*Type
@@ -132,14 +138,20 @@ func New(pkg *ast.Package, importPath string, mode Mode) *Package {
 	// BEGIN PARKER
 	var files []File
 	for fileName, file := range pkg.Files {
+		//r.readFile(file)
 		var comments []ast.CommentGroup
 		for _, comment := range file.Comments {
 			comments = append(comments, *comment)
 		}
 
+		//TODO: update Consts, Types, Vars, and Funcs w/ File level instead of package level
 		files = append(files, File{
 			Filename: fileName,
 			Comments: comments,
+			Consts:   nil,
+			Types:    nil,
+			Vars:     nil,
+			Funcs:    nil,
 		})
 	}
 	// END PARKER
@@ -148,7 +160,7 @@ func New(pkg *ast.Package, importPath string, mode Mode) *Package {
 		Name:       pkg.Name,
 		ImportPath: importPath,
 		Imports:    sortedKeys(r.imports),
-		Files:      files, // Parker
+		Files: 		files, // Parker
 		Notes:      r.notes,
 		Bugs:       noteBodies(r.notes["BUG"]),
 		Consts:     sortedValues(r.values, token.CONST),
