@@ -11,6 +11,6 @@ code documentation.
 
 ## How do I use lm-godoc?
 1. Navigate to lm-godoc `cd /lm-godoc`
-2. Update `<Golang SDK>/go/doc/doc.go` with modified version in `lm-godoc/doc.go`
+2. Update `<Golang SDK>/go/doc/doc.go` with modified version in `lm-godoc/doc.go.txt` as `doc.go`
 3. Make the project `make`
 4. Run lm-godoc on a project directory `./godoc.out <project_dir>`
