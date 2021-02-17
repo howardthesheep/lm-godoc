@@ -77,6 +77,9 @@ func main() {
 		}
 	})
 
+	// Handle requests to CSS dir by HTML pages
+	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("./www/css/"))))
+
 	// Open User's Web Browser and direct to URL
 	//command := exec.Command("xdg-open", URL)
 	//_ = command.Start()
