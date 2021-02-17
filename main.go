@@ -6,11 +6,15 @@ import (
 	"go/parser"
 	"go/token"
 	"io/ioutil"
+	"net/http"
 	"os"
+	"os/exec"
 	"strings"
 )
 
 var lmlogger = Logger{}
+
+const URL = "http://localhost:6969/"
 
 func main() {
 	args := os.Args[1:]
@@ -34,6 +38,7 @@ func main() {
 		return
 	}
 
+	// Print []doc.Package to the User
 	for _, documentPackage := range documentPackages {
 		lmlogger.Debugf("Package: %s \n\tImport Path: %s\n\tFiles:", documentPackage.Name, documentPackage.ImportPath)
 
@@ -41,6 +46,14 @@ func main() {
 			lmlogger.Debugf("\t%s", fileName)
 		}
 	}
+
+	// Open User's Web Browser and direct to URL
+	command := exec.Command("xdg-open", URL)
+	_ = command.Start()
+
+	// Populate www directory
+	http.Handle("/", http.FileServer(http.Dir("./www")))
+	_ = http.ListenAndServe(":6969", nil)
 }
 
 // findGoPackages recursively searches baseDir directory and its subdirectories for Golang
