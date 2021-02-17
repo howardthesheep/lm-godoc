@@ -1,3 +1,4 @@
+// This is a main package comment!
 package main
 
 import (
@@ -9,14 +10,21 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"os/exec"
 	"strings"
 )
 
+// Package-specific Logger
 var lmlogger = Logger{}
 
+// HTTP Web Server Location
 const URL = "http://localhost:6969/"
 
+type htmlTemplateData struct {
+	RootDir          string
+	DocumentPackages []doc.Package
+}
+
+// main is the default Golang Driver Func
 func main() {
 	args := os.Args[1:]
 	if len(args) != 1 {
@@ -41,11 +49,13 @@ func main() {
 
 	// Print []doc.Package to the User
 	for _, documentPackage := range documentPackages {
-		lmlogger.Debugf("Package: %s \n\tImport Path: %s\n\tFiles:", documentPackage.Name, documentPackage.ImportPath)
+		lmlogger.Debugf(
+			"Package: %s \n\tImport Path: %s\n\tDoc: %s",
+			documentPackage.Name,
+			documentPackage.ImportPath,
+			documentPackage.Doc,
+		)
 
-		for _, fileName := range documentPackage.Filenames {
-			lmlogger.Debugf("\t%s", fileName)
-		}
 	}
 
 	// Load HTML Template for Displaying documentPackages
@@ -57,15 +67,20 @@ func main() {
 
 	// Handler for serving htmlTemplate on request to root path (Ex. http://localhost:6969/)
 	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
-		err := htmlTemplate.Execute(writer, documentPackages)
+		templateData := htmlTemplateData{
+			RootDir:          baseDirStr,
+			DocumentPackages: documentPackages,
+		}
+
+		err := htmlTemplate.Execute(writer, templateData)
 		if err != nil {
 			lmlogger.Errorf("%s", err)
 		}
 	})
 
 	// Open User's Web Browser and direct to URL
-	command := exec.Command("xdg-open", URL)
-	_ = command.Start()
+	//command := exec.Command("xdg-open", URL)
+	//_ = command.Start()
 
 	// Start the HTTP Web Server
 	_ = http.ListenAndServe(":6969", nil)
@@ -119,7 +134,7 @@ func createDocPackages(packages []string, baseDir string) ([]doc.Package, error)
 	var pkgs []ast.Package
 	for _, dir := range packages {
 		fset := token.NewFileSet()
-		packs, err := parser.ParseDir(fset, dir, nil, parser.AllErrors)
+		packs, err := parser.ParseDir(fset, dir, nil, parser.ParseComments)
 		if err != nil {
 			return nil, err
 		}
@@ -150,6 +165,7 @@ func createDocPackages(packages []string, baseDir string) ([]doc.Package, error)
 
 		// Update Import Path
 		pack.ImportPath = packPath
+
 		docs = append(docs, *pack)
 	}
 	return docs, nil
