@@ -58,20 +58,51 @@ func main() {
 	//}
 
 	// Load HTML Template for Displaying documentPackages
-	htmlTemplate, err := template.ParseFiles("./www/index.html")
+	indexTemplate, err := template.ParseFiles("./www/index.html")
 	if err != nil {
 		lmlogger.Errorf("%s", err)
 		return
 	}
 
-	// Handler for serving htmlTemplate on request to root path (Ex. http://localhost:6969/)
-	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
-		templateData := htmlTemplateData{
-			RootDir:          baseDirStr,
-			DocumentPackages: documentPackages,
-		}
+	packagesTemplate, err := template.ParseFiles("./www/packages.html")
+	if err != nil {
+		lmlogger.Errorf("%s", err)
+		return
+	}
 
-		err := htmlTemplate.Execute(writer, templateData)
+	filesTemplate, err := template.ParseFiles("./www/files.html")
+	if err != nil {
+		lmlogger.Errorf("%s", err)
+		return
+	}
+
+	// Load HTML Template Data
+	templateData := htmlTemplateData{
+		RootDir:          baseDirStr,
+		DocumentPackages: documentPackages,
+	}
+
+	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
+		http.Redirect(writer, request, URL+"home", http.StatusPermanentRedirect)
+	})
+
+	// Handler for serving indexTemplate on request to root path (Ex. http://localhost:6969/)
+	http.HandleFunc("/home", func(writer http.ResponseWriter, request *http.Request) {
+		err = indexTemplate.Execute(writer, templateData)
+		if err != nil {
+			lmlogger.Errorf("%s", err)
+		}
+	})
+
+	http.HandleFunc("/packages", func(writer http.ResponseWriter, request *http.Request) {
+		err = packagesTemplate.Execute(writer, templateData)
+		if err != nil {
+			lmlogger.Errorf("%s", err)
+		}
+	})
+
+	http.HandleFunc("/files", func(writer http.ResponseWriter, request *http.Request) {
+		err = filesTemplate.Execute(writer, templateData)
 		if err != nil {
 			lmlogger.Errorf("%s", err)
 		}

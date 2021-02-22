@@ -1,0 +1,21 @@
+<html>
+    <head>
+        <title>Packages</title>
+        <link rel="stylesheet" href="css/main.css">
+    </head>
+    <body>
+        <main>
+            <h1>Project Packages</h1>
+            <ul>
+                {{range .DocumentPackages}}
+                    <li>
+                        <details>
+                            <summary>{{.Name}}</summary>
+                            <p><b>Path:</b> {{.ImportPath}}</p>
+                        </details>
+                    </li>
+                {{end}}
+            </ul>
+        </main>
+    </body>
+</html>

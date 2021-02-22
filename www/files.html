@@ -1,0 +1,23 @@
+<html>
+    <head>
+        <title>Files</title>
+        <link rel="stylesheet" href="css/main.css">
+    </head>
+    <body>
+        <main>
+            <h1>Project Files</h1>
+            <ul>
+                {{range .DocumentPackages}}
+                    {{range .Files}}
+                        <li>
+                            <details>
+                                <summary>{{.Filename}}</summary>
+                                <p></p>
+                            </details>
+                        </li>
+                    {{end}}
+                {{end}}
+            </ul>
+        </main>
+    </body>
+</html>

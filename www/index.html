@@ -1,35 +1,13 @@
 <html>
     <head>
-        <title>TEST</title>
+        <title>Home</title>
         <link rel="stylesheet" href="css/main.css">
     </head>
     <body>
-        <h1>{{.RootDir}}</h1>
+        <h1>Home</h1>
         <main>
-            <h2>Packages</h2>
-            <ul>
-                {{range .DocumentPackages}}
-                    <li>
-                        <details>
-                            <summary><strong>{{.Name}}</strong></summary>
-                            <p><b>Path:</b> {{.ImportPath}}</p>
-                            <b>Documentation:</b>
-                            <p>
-                                {{.Doc}}
-                            </p>
-                            <b>Functions</b>
-                            <ul>
-                                {{range .Funcs}}
-                                <li>
-                                    <p>{{.Name}}</p>
-                                    <p>{{.Doc}}</p>
-                                </li>
-                                {{end}}
-                            </ul>
-                        </details>
-                    </li>
-                {{end}}
-            </ul>
+            <a href="/packages">Packages</a>
+            <a href="/files">Files</a>
         </main>
     </body>
 </html>
