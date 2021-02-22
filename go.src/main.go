@@ -47,17 +47,9 @@ func main() {
 		return
 	}
 
-	// Print []doc.Package to the User
-	//for _, documentPackage := range documentPackages {
-	//	lmlogger.Debugf(
-	//		"Package: %s \n\tImport Path: %s\n\tDoc: %s",
-	//		documentPackage.Name,
-	//		documentPackage.ImportPath,
-	//		documentPackage.Doc,
-	//	)
-	//}
-
 	// Load HTML Template for Displaying documentPackages
+	//TODO: Move template code and HandleFunc code to web/template.go
+	// and web/routes.go
 	indexTemplate, err := template.ParseFiles("./www/index.html")
 	if err != nil {
 		lmlogger.Errorf("%s", err)

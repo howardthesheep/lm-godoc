@@ -2,7 +2,7 @@
 GOFILES := $(shell find . -type f -name "*.go")
 
 lm-godoc:
-	go build -o godoc.out main.go log.go
+	go build -o godoc.out ./go.src/main.go ./go.src/log.go
 
 all: lm-godoc
 
