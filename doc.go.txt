@@ -138,20 +138,31 @@ func New(pkg *ast.Package, importPath string, mode Mode) *Package {
 	// BEGIN PARKER
 	var files []File
 	for fileName, file := range pkg.Files {
-		//r.readFile(file)
+		var fileReader reader
+		fileReader.filenames = make([]string, len(pkg.Files))
+		fileReader.imports = make(map[string]int)
+		fileReader.mode = mode
+		fileReader.types = make(map[string]*namedType)
+		fileReader.funcs = make(methodSet)
+		fileReader.notes = make(map[string][]*Note)
+
+		// Read file
+		fileReader.readFile(file)
+
+		// Extract File Comments
 		var comments []ast.CommentGroup
 		for _, comment := range file.Comments {
 			comments = append(comments, *comment)
 		}
 
-		//TODO: update Consts, Types, Vars, and Funcs w/ File level instead of package level
+		// Update Consts, Types, Vars, and Funcs w/ File level instead of package level
 		files = append(files, File{
 			Filename: fileName,
 			Comments: comments,
-			Consts:   nil,
-			Types:    nil,
-			Vars:     nil,
-			Funcs:    nil,
+			Consts:   sortedValues(fileReader.values, token.CONST),
+			Types:    sortedTypes(fileReader.types, mode&AllMethods != 0),
+			Vars:     sortedValues(fileReader.values, token.VAR), //TODO
+			Funcs:    sortedFuncs(fileReader.funcs, true), //TODO
 		})
 	}
 	// END PARKER
@@ -163,10 +174,6 @@ func New(pkg *ast.Package, importPath string, mode Mode) *Package {
 		Files: 		files, // Parker
 		Notes:      r.notes,
 		Bugs:       noteBodies(r.notes["BUG"]),
-		Consts:     sortedValues(r.values, token.CONST),
-		Types:      sortedTypes(r.types, mode&AllMethods != 0),
-		Vars:       sortedValues(r.values, token.VAR),
-		Funcs:      sortedFuncs(r.funcs, true),
 	}
 }
 
