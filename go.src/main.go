@@ -6,11 +6,12 @@ import (
 	"go/doc"
 	"go/parser"
 	"go/token"
-	"html/template"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
+
+	"./web"
 )
 
 // Package-specific Logger
@@ -47,26 +48,14 @@ func main() {
 		return
 	}
 
-	// Load HTML Template for Displaying documentPackages
-	//TODO: Move template code and HandleFunc code to web/template.go
-	// and web/routes.go
-	indexTemplate, err := template.ParseFiles("./www/index.html")
+	// Load our html templates
+	err = web.InitializeTemplates()
 	if err != nil {
 		lmlogger.Errorf("%s", err)
 		return
 	}
 
-	packagesTemplate, err := template.ParseFiles("./www/packages.html")
-	if err != nil {
-		lmlogger.Errorf("%s", err)
-		return
-	}
-
-	filesTemplate, err := template.ParseFiles("./www/files.html")
-	if err != nil {
-		lmlogger.Errorf("%s", err)
-		return
-	}
+	//TODO: Move HandleFunc code to web/routes.go
 
 	// Load HTML Template Data
 	templateData := htmlTemplateData{
@@ -80,21 +69,21 @@ func main() {
 
 	// Handler for serving indexTemplate on request to root path (Ex. http://localhost:6969/)
 	http.HandleFunc("/home", func(writer http.ResponseWriter, request *http.Request) {
-		err = indexTemplate.Execute(writer, templateData)
+		err = web.IndexTemplate.Execute(writer, templateData)
 		if err != nil {
 			lmlogger.Errorf("%s", err)
 		}
 	})
 
 	http.HandleFunc("/packages", func(writer http.ResponseWriter, request *http.Request) {
-		err = packagesTemplate.Execute(writer, templateData)
+		err = web.PackagesTemplate.Execute(writer, templateData)
 		if err != nil {
 			lmlogger.Errorf("%s", err)
 		}
 	})
 
 	http.HandleFunc("/files", func(writer http.ResponseWriter, request *http.Request) {
-		err = filesTemplate.Execute(writer, templateData)
+		err = web.FilesTemplate.Execute(writer, templateData)
 		if err != nil {
 			lmlogger.Errorf("%s", err)
 		}
